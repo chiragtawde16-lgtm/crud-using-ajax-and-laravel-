@@ -2,7 +2,9 @@
 <html>
 <head>
     <title>Students</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="bg-light" style="background-color: #e68663; padding: 30px;">
@@ -10,10 +12,14 @@
 <div class="container mt-5">
 
     <div class="d-flex justify-content-between" style="background-color: #6924e8; padding: 20px; border-radius: 10px;">
-        <h2>Student List</h2>
+        <h2 class="text-white">Student List</h2>
+        
+
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#studentModal">
             Add Student
         </button>
+        
+       
     </div>
 
     <table class="table table-bordered mt-3">
@@ -30,44 +36,45 @@
         <tbody id="studentTable"></tbody>
     </table>
 
-<!-- Add Student Modal -->
-<meta name="csrf-token" content="{{ csrf_token() }}">
-
+<!-- MODAL -->
 <div class="modal fade" id="studentModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
 
-            <div class="text-white d-flex justify-content-between align-items-center p-3" style="background-color: #6924e8;">
-                <h5 class="text-center">Add / Edit Student</h5> <!-- 😄 EDIT: title changed -->
+            <div class="text-white d-flex justify-content-between align-items-center p-3"
+                 style="background-color: #6924e8;">
+                <h5>Add / Edit Student</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
 
+                <!-- ✅ GLOBAL ERROR BOX (TOP OF MODAL) -->
+                <div id="errorBox"></div>
+
                 <form id="studentForm">
-                    <label for="name">Name:</label>
+
+                    <label>Name:</label>
                     <input type="text" id="name" class="form-control mb-2" placeholder="Enter Name">
-                    <small class="text-danger" id="name_error"></small>
 
-                    <label for="email">Email:</label>
+                    <label>Email:</label>
                     <input type="email" id="email" class="form-control mb-2" placeholder="Enter Email">
-                    <small class="text-danger" id="email_error"></small>
 
-                    <label for="phone">Phone:</label>
+                    <label>Phone:</label>
                     <input type="text" id="phone" class="form-control mb-2" placeholder="Enter Phone">
-                    <small class="text-danger" id="phone_error"></small>
 
-                    <!-- 😄 EDIT: hidden input for ID -->
                     <input type="hidden" id="student_id">
 
                     <button type="submit" class="btn btn-primary">
                         Save Student
-                    </button>
+                    </button> <br>
+                    <button type="button" class="btn btn-secondary mt-2" data-bs-dismiss="modal">
+                       ← Back
+                     </button>
 
                 </form>
 
             </div>
-
         </div>
     </div>
 </div>
@@ -75,95 +82,99 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 $(document).ready(function(){
 
-    let editId = null; // 😄 EDIT: store update ID
+    let editId = null;
+     $("button[data-bs-target='#studentModal']").on("click", function(){
+        editId = null;
+        $("#studentForm")[0].reset();
+        $("#errorBox").html("");
+    });
 
     loadData();
 
     function loadData()
-    {
-        $.get("/students/fetch", function(data){
+{
+    $.get("/students/fetch", function(data){
 
-            let rows = "";
+        let rows = "";
 
-            data.forEach(function(student){
-                rows += `
-                    <tr>
-                        <td>${ student.id}</td>
-                        <td>${student.name}</td>
-                        <td>${student.email}</td>
-                        <td>${student.phone}</td>
-                        <td>
+        data.forEach(function(student){
+            rows += `
+                <tr id="row_${student.id}">
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.email}</td>
+                    <td>${student.phone}</td>
+                    <td>
+                        <button onclick="editStudent(${student.id})" class="btn btn-warning btn-sm">
+                            Edit
+                        </button>
 
-                            <!-- 😄 EDIT: Edit button added -->
-                            <button onclick="editStudent(${student.id})" class="btn btn-warning btn-sm">
-    Edit
-</button>
-                            <button onclick="deleteStudent(${student.id})" class="btn btn-danger btn-sm">
-                                Delete
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            $("#studentTable").html(rows);
+                        <button onclick="deleteStudent(${student.id})" class="btn btn-danger btn-sm">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `;
         });
-    }
 
-    window.deleteStudent = function(id)
-    {
-        $.get("/students/delete/" + id, function(){
-            alert("Deleted Successfully");
-            loadData();
-        });
-    }
+        $("#studentTable").html(rows);
+    });
+}
 
-    // 😄 EDIT FUNCTION ADDED
-    window.editStudent = function(id){
+   window.deleteStudent = function(id)
+{
+    $.get("/students/delete/" + id, function(){
 
-    $.get("/students/show/" + id, function(data){
-
-        $("#name").val(data.name);
-        $("#email").val(data.email);
-        $("#phone").val(data.phone);
-
-        editId = id; // update mode
-
-        var modal = new bootstrap.Modal(document.getElementById('studentModal'));
-        modal.show();
+        // UI se remove
+        $("#row_" + id).remove();
 
     });
-
 }
+    window.editStudent = function(id)
+    {
+        $.get("/students/show/" + id, function(data){
+
+            $("#name").val(data.name);
+            $("#email").val(data.email);
+            $("#phone").val(data.phone);
+
+            editId = id;
+
+            new bootstrap.Modal(document.getElementById('studentModal')).show();
+        });
+    }
+
     $("#studentForm").submit(function(e){
 
         e.preventDefault();
+
+        $("#errorBox").html(""); // clear old errors
+
         let phone = $("#phone").val();
+        let email = $("#email").val();
 
-           let phoneRegex = /^[0-9]{10}$/;
+        let phoneRegex = /^[0-9]{10}$/;
+        let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-             if(!phoneRegex.test(phone)) 
-          {
-              $("#phone_error").text("Phone number must be 10 digits");
-               return;
+        if(!phoneRegex.test(phone))
+        {
+            $("#errorBox").html(`<div class="alert alert-danger">Phone must be 10 digits</div>`);
+            return;
         }
-         let email = $("#email").val();
 
-         let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-           if(!emailRegex.test(email))
-           {
-              $("#email_error").text("Please enter a valid email address");
-                return;
-             }
+        if(!emailRegex.test(email))
+        {
+            $("#errorBox").html(`<div class="alert alert-danger">Enter valid email</div>`);
+            return;
+        }
 
         let url = "/students/store";
 
-        // 😄 EDIT: if edit mode then update URL
         if(editId != null){
             url = "/students/update/" + editId;
         }
@@ -173,76 +184,65 @@ $(document).ready(function(){
             type: "POST",
             data: {
                 name: $("#name").val(),
-                email: $("#email").val(),
-                phone: $("#phone").val(),
+                email: email,
+                phone: phone,
                 _token: $("meta[name='csrf-token']").attr('content')
             },
+
             success: function(response){
 
-                alert(editId ? "Updated Successfully" : "Student Added Successfully");
+                $("#errorBox").html(`<div class="alert alert-success">Saved Successfully</div>`);
 
                 $("#studentForm")[0].reset();
+                $("#errorBox").html("");
 
-                editId = null; // 😄 reset edit mode
+                editId = null;
 
-                var modal = bootstrap.Modal.getInstance(
+                bootstrap.Modal.getInstance(
                     document.getElementById('studentModal')
-                );
-
-                modal.hide();
+                ).hide();
 
                 loadData();
             },
+
             error: function(xhr){
 
                 let errors = xhr.responseJSON.errors;
 
+                let errorHtml = `<div class="alert alert-danger"><ul class="mb-0">`;
+
                 if(errors.name){
-                    $("#name_error").text(errors.name[0]);
+                    errorHtml += `<li>${errors.name[0]}</li>`;
                 }
 
                 if(errors.email){
-                    $("#email_error").text(errors.email[0]);
+                    errorHtml += `<li>${errors.email[0]}</li>`;
                 }
 
                 if(errors.phone){
-                    $("#phone_error").text(errors.phone[0]);
+                    errorHtml += `<li>${errors.phone[0]}</li>`;
                 }
+
+                errorHtml += `</ul></div>`;
+
+                $("#errorBox").html(errorHtml);
             }
-
         });
-
     });
 
-    $("#name").on("input", function(){
-        $("#name_error").text("");
-    });
-
-    $("#email").on("input", function(){
-        $("#email_error").text("");
-    });
-
-    $("#phone").on("input", function(){
-        $("#phone_error").text("");
+    $("#name, #email, #phone").on("input", function(){
+        $("#errorBox").html("");
     });
 
     $('#studentModal').on('hidden.bs.modal', function () {
 
         $("#studentForm")[0].reset();
-
-        $("#name_error").text("");
-        $("#email_error").text("");
-        $("#phone_error").text("");
-
-        editId = null; // 😄 reset when modal closes
+        $("#errorBox").html("");
+        editId = null;
     });
 
 });
-
-
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

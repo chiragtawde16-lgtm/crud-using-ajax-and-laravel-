@@ -20,10 +20,10 @@ class StudentController extends Controller
     public function store(Request $request)
 {
     $request->validate([
-        'name' => 'required',
-        'email' => 'required|email',
-        'phone' => 'required'
-    ]);
+    'name' => 'required',
+    'email' => 'required|email|unique:students,email',
+    'phone' => 'required|digits:10|unique:students,phone'
+]);
 
     $student = Student::create([
         'name' => $request->name,
@@ -32,16 +32,16 @@ class StudentController extends Controller
     ]);
 
     return response()->json([
-        'status' => 'success',
-        'data' => $student
+        'status' => 'success'
     ]);
 }
 
     public function fetch()
 {
-    return Student::orderBy('id', 'desc')->get();
+    return Student::whereNull('deleted_at')
+        ->orderBy('id', 'desc')
+        ->get();
 }
-
     public function destroy($id)
     {
         Student::destroy($id);
@@ -54,8 +54,8 @@ class StudentController extends Controller
 {
     $request->validate([
         'name' => 'required',
-        'email' => 'required|email',
-        'phone' => 'required'
+        'email' => 'required|email|unique:students,email,'.$id,
+        'phone' => 'required|digits:10|unique:students,phone,'.$id
     ]);
 
     $student = Student::find($id);
