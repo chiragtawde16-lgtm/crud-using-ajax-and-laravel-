@@ -13,11 +13,13 @@
     <h2 class="text-center">Add Student</h2>
  
     <form id="studentForm">
-
+        <label for="name">Name:</label>
         <input type="text" id="name" class="form-control mb-2" placeholder="Name">
 
+        <label for="email">Email:</label>
         <input type="text" id="email" class="form-control mb-2" placeholder="Email">
 
+        <label for="phone">Phone:</label>
         <input type="text" id="phone" class="form-control mb-2" placeholder="Phone">
 
         <button type="submit" class="btn btn-success">Save</button>

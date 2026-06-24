@@ -16,3 +16,6 @@ Route::post('/students/update/{id}', [StudentController::class, 'update'])->name
 
 Route::get('/students/delete/{id}', [StudentController::class, 'destroy'])->name('students.delete');
 Route::get('/students/fetch', [StudentController::class, 'fetch']);
+
+Route::post('/students/update/{id}', [StudentController::class, 'update']);
+Route::get('/students/show/{id}', [StudentController::class, 'show']);

@@ -50,4 +50,28 @@ class StudentController extends Controller
             'status' => 'deleted'
         ]);
     }
+    public function update(Request $request, $id)
+{
+    $request->validate([
+        'name' => 'required',
+        'email' => 'required|email',
+        'phone' => 'required'
+    ]);
+
+    $student = Student::find($id);
+
+    $student->update([
+        'name' => $request->name,
+        'email' => $request->email,
+        'phone' => $request->phone,
+    ]);
+
+    return response()->json([
+        'status' => 'success'
+    ]);
+}
+public function show($id)
+{
+    return Student::find($id);
+}
 }
