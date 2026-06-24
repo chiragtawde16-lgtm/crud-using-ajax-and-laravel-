@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\ExcelController;
 
 /* Home */
 Route::get('/', [StudentController::class, 'index']);
@@ -19,3 +20,4 @@ Route::get('/students/fetch', [StudentController::class, 'fetch']);
 
 Route::post('/students/update/{id}', [StudentController::class, 'update']);
 Route::get('/students/show/{id}', [StudentController::class, 'show']);
+Route::post('/upload-excel', [ExcelController::class, 'uploadExcel']);

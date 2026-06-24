@@ -18,6 +18,11 @@
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#studentModal">
             Add Student
         </button>
+        <button class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#excelModal">
+    Upload Excel
+</button>
         
        
     </div>
@@ -80,7 +85,44 @@
 </div>
 
 </div>
+<!-- 😄 ADD KIYA -->
+<div class="modal fade" id="excelModal">
 
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5>Upload Excel File</h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <input type="file"
+                       id="excelFile"
+                       class="form-control">
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button id="uploadExcel"
+                        class="btn btn-primary">
+                    Upload
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -241,6 +283,58 @@ $(document).ready(function(){
         editId = null;
     });
 
+     // 😄 EXCEL FILE CHECK
+
+     $("#uploadExcel").click(function(){
+
+    let file = $("#excelFile")[0].files[0];
+
+    // check file
+    if(!file){
+        alert("Please select a file");
+        return;
+    }
+
+    // create form data
+    let formData = new FormData();
+    formData.append("file", file);
+
+    // CSRF token (important for Laravel)
+    formData.append("_token", $("meta[name='csrf-token']").attr('content'));
+
+    $.ajax({
+        url: "/upload-excel",
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+
+        success: function(res){
+
+            alert("File uploaded successfully");
+
+            // clear file input
+            $("#excelFile").val("");
+
+            // close modal
+            let modalEl = document.getElementById('excelModal');
+            let modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+        },
+
+        error: function(){
+
+            alert("Upload failed. Please try again.");
+        }
+    });
+
+});
+
+
+// reset file when modal is closed
+$('#excelModal').on('hidden.bs.modal', function () {
+    $("#excelFile").val("");
+});
 });
 </script>
 
