@@ -7,23 +7,30 @@ use Illuminate\Http\Request;
 class ExcelController extends Controller
 {
     public function uploadExcel(Request $request)
-    {
-        // check file
-        if (!$request->hasFile('file')) {
-            return response()->json(['error' => 'No file found'], 400);
-        }
-
-        $file = $request->file('file');
-
-        // file name
-        $name = time() . '.' . $file->getClientOriginalExtension();
-
-        // save in public/uploads folder
-        $file->move(public_path('uploads'), $name);
-
+{
+    if (!$request->hasFile('file')) {
         return response()->json([
-            'message' => 'File uploaded successfully',
-            'file' => $name
-        ]);
+            'message' => 'No file selected'
+        ], 400);
     }
+
+    $file = $request->file('file');
+
+    // Original file name
+    $fileName = $file->getClientOriginalName();
+
+    // Check if file already exists
+    if (file_exists(public_path('uploads/' . $fileName))) {
+        return response()->json([
+            'message' => 'This file is already uploaded'
+        ], 400);
+    }
+
+    // Save file
+    $file->move(public_path('uploads'), $fileName);
+
+    return response()->json([
+        'message' => 'File uploaded successfully'
+    ]);
+}
 }

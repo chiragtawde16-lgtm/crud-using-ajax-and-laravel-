@@ -322,10 +322,15 @@ $(document).ready(function(){
             modal.hide();
         },
 
-        error: function(){
+        error: function(xhr){
 
-            alert("Upload failed. Please try again.");
-        }
+    if(xhr.responseJSON && xhr.responseJSON.message){
+        alert(xhr.responseJSON.message);
+    }
+    else{
+        alert("Upload failed");
+    }
+}
     });
 
 });
