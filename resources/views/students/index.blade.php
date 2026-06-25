@@ -130,7 +130,10 @@
 $(document).ready(function(){
 
     let editId = null;
-     $("button[data-bs-target='#studentModal']").on("click", function(){
+
+    let uploadedFiles = []; // NEW 👉 important: store uploaded file names
+
+    $("button[data-bs-target='#studentModal']").on("click", function(){
         editId = null;
         $("#studentForm")[0].reset();
         $("#errorBox").html("");
@@ -139,44 +142,42 @@ $(document).ready(function(){
     loadData();
 
     function loadData()
-{
-    $.get("/students/fetch", function(data){
+    {
+        $.get("/students/fetch", function(data){
 
-        let rows = "";
+            let rows = "";
 
-        data.forEach(function(student){
-            rows += `
-                <tr id="row_${student.id}">
-                    <td>${student.id}</td>
-                    <td>${student.name}</td>
-                    <td>${student.email}</td>
-                    <td>${student.phone}</td>
-                    <td>
-                        <button onclick="editStudent(${student.id})" class="btn btn-warning btn-sm">
-                            Edit
-                        </button>
+            data.forEach(function(student){
+                rows += `
+                    <tr id="row_${student.id}">
+                        <td>${student.id}</td>
+                        <td>${student.name}</td>
+                        <td>${student.email}</td>
+                        <td>${student.phone}</td>
+                        <td>
+                            <button onclick="editStudent(${student.id})" class="btn btn-warning btn-sm">
+                                Edit
+                            </button>
 
-                        <button onclick="deleteStudent(${student.id})" class="btn btn-danger btn-sm">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-            `;
+                            <button onclick="deleteStudent(${student.id})" class="btn btn-danger btn-sm">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            $("#studentTable").html(rows);
         });
+    }
 
-        $("#studentTable").html(rows);
-    });
-}
+    window.deleteStudent = function(id)
+    {
+        $.get("/students/delete/" + id, function(){
+            $("#row_" + id).remove();
+        });
+    }
 
-   window.deleteStudent = function(id)
-{
-    $.get("/students/delete/" + id, function(){
-
-        // UI se remove
-        $("#row_" + id).remove();
-
-    });
-}
     window.editStudent = function(id)
     {
         $.get("/students/show/" + id, function(data){
@@ -195,7 +196,7 @@ $(document).ready(function(){
 
         e.preventDefault();
 
-        $("#errorBox").html(""); // clear old errors
+        $("#errorBox").html("");
 
         let phone = $("#phone").val();
         let email = $("#email").val();
@@ -277,86 +278,99 @@ $(document).ready(function(){
     });
 
     $('#studentModal').on('hidden.bs.modal', function () {
-
         $("#studentForm")[0].reset();
         $("#errorBox").html("");
         editId = null;
     });
 
-     // 😄 EXCEL FILE CHECK
+    // =========================
+    // 😄 EXCEL FILE UPLOAD
+    // =========================
 
-     $("#uploadExcel").click(function(){
+    $("#uploadExcel").click(function(){
 
-    let file = $("#excelFile")[0].files[0];
+        let file = $("#excelFile")[0].files[0];
 
-    // check file
-    if(!file){
-        alert("Please select a file");
-        return;
-    }
-    let allowedTypes = [
-             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "application/vnd.ms-excel",
-           "text/csv"
-        ];
+        if(!file){
+            alert("Please select a file");
+            return;
+        }
 
-    if(!allowedTypes.includes(file.type))
-        {
-          alert("Only Excel Files Allowed (.xlsx, .xls, .csv)");
-          return;
-          }
-     if(file.size === 0)
-{
-    alert("Empty File Cannot Be Uploaded");
-    return;
-}
-    // create form data
-    let formData = new FormData();
-    formData.append("file", file);
+        let fileName = file.name; // NEW 👉 file name capture
 
-    // CSRF token (important for Laravel)
-    formData.append("_token", $("meta[name='csrf-token']").attr('content'));
+        // NEW 👉 duplicate check (frontend only)
+        if(uploadedFiles.includes(fileName)){
+            alert("This file is already uploaded");
 
-    $.ajax({
-        url: "/upload-excel",
-        type: "POST",
-        data: formData,
-        contentType: false,
-        processData: false,
-
-        success: function(res){
-
-            alert("File uploaded successfully");
-
-            // clear file input
+            // NEW 👉 clear input (important UX fix)
             $("#excelFile").val("");
 
-            // close modal
-            let modalEl = document.getElementById('excelModal');
-            let modal = bootstrap.Modal.getInstance(modalEl);
-            modal.hide();
-            
-            loadData();
-        },
+            return;
+        }
 
-        error: function(xhr){
+        let allowedTypes = [
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-excel",
+            "text/csv"
+        ];
 
-    if(xhr.responseJSON && xhr.responseJSON.message){
-        alert(xhr.responseJSON.message);
-    }
-    else{
-        alert("Upload failed");
-    }
-}
+        if(!allowedTypes.includes(file.type))
+        {
+            alert("Only Excel Files Allowed (.xlsx, .xls, .csv)");
+            return;
+        }
+
+        if(file.size === 0)
+        {
+            alert("Empty File Cannot Be Uploaded");
+            return;
+        }
+
+        let formData = new FormData();
+        formData.append("file", file);
+        formData.append("_token", $("meta[name='csrf-token']").attr('content'));
+
+        $.ajax({
+            url: "/upload-excel",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+
+            success: function(res){
+
+                alert("File uploaded successfully");
+
+                // NEW 👉 store uploaded file name after success
+                uploadedFiles.push(fileName);
+
+                $("#excelFile").val("");
+
+                let modalEl = document.getElementById('excelModal');
+                let modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+
+                loadData();
+            },
+
+            error: function(xhr){
+
+                if(xhr.responseJSON && xhr.responseJSON.message){
+                    alert(xhr.responseJSON.message);
+                }
+                else{
+                    alert("Upload failed");
+                }
+            }
+        });
+
     });
 
-});
+    // reset file when modal is closed
+    $('#excelModal').on('hidden.bs.modal', function () {
+        $("#excelFile").val("");
+    });
 
-
-// reset file when modal is closed
-$('#excelModal').on('hidden.bs.modal', function () {
-    $("#excelFile").val("");
-});
 });
 </script>
 
