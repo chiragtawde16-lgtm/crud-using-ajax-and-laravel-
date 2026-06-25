@@ -294,7 +294,22 @@ $(document).ready(function(){
         alert("Please select a file");
         return;
     }
+    let allowedTypes = [
+             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-excel",
+           "text/csv"
+        ];
 
+    if(!allowedTypes.includes(file.type))
+        {
+          alert("Only Excel Files Allowed (.xlsx, .xls, .csv)");
+          return;
+          }
+     if(file.size === 0)
+{
+    alert("Empty File Cannot Be Uploaded");
+    return;
+}
     // create form data
     let formData = new FormData();
     formData.append("file", file);
@@ -320,6 +335,8 @@ $(document).ready(function(){
             let modalEl = document.getElementById('excelModal');
             let modal = bootstrap.Modal.getInstance(modalEl);
             modal.hide();
+            
+            loadData();
         },
 
         error: function(xhr){
