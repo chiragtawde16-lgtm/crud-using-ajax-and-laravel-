@@ -12,21 +12,41 @@
 <div class="container mt-5">
 
     <div class="d-flex justify-content-between" style="background-color: #6924e8; padding: 20px; border-radius: 10px;">
-        <h2 class="text-white">Student List</h2>
-        
 
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#studentModal">
-            Add Student
+    <!-- Left Side Empty -->
+    <div style="width:250px;"></div>
+
+    <!-- Center Heading -->
+    <h2 class="text-white m-0 text-center flex-grow-1">
+        Student List
+    </h2>
+
+    <!-- Right Side Buttons -->
+    <div class="d-flex gap-2">
+
+        <!-- Add Student -->
+        <button class="btn btn-primary px-4"
+                data-bs-toggle="modal"
+                data-bs-target="#studentModal">
+            + Add Student
         </button>
-        <button class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#excelModal">
-    Upload Excel
-</button>
-        
-       
+
+        <!-- Upload Excel -->
+        <button class="btn btn-success px-4"
+                data-bs-toggle="modal"
+                data-bs-target="#excelModal">
+            Upload Excel
+        </button>
+
+        <!-- Logout -->
+        <a href="/logout"
+           class="btn btn-danger px-3">
+            Logout
+        </a>
+
     </div>
 
+</div>
     <table class="table table-bordered mt-3">
         <thead class="table-dark">
             <tr>
@@ -50,12 +70,12 @@
                  style="background-color: #6924e8;">
                 <h5>Add / Edit Student</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
+                     </div>
 
-            <div class="modal-body">
+                            <div class="modal-body">
 
-                <!-- ✅ GLOBAL ERROR BOX (TOP OF MODAL) -->
-                <div id="errorBox"></div>
+                               <!-- ✅ GLOBAL ERROR BOX (TOP OF MODAL) -->
+                                   <div id="errorBox"></div>
 
                 <form id="studentForm">
 
@@ -370,6 +390,14 @@ $(document).ready(function(){
     $('#excelModal').on('hidden.bs.modal', function () {
         $("#excelFile").val("");
     });
+      
+    setTimeout(function(){
+
+        alert("Session Expired. Please Login Again.");
+
+        window.location.href = "/logout";
+
+    }, 300000);
 
 });
 </script>
