@@ -4,12 +4,52 @@
     <title>Students</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
+<style>
+
+    .company-header{
+        display:flex;
+        align-items:center;
+        gap:12px;
+        margin-bottom:20px;
+    }
+
+    .company-header img{
+        width:60px;
+        height:60px;
+        border-radius:50%;
+        object-fit:cover;
+    }
+
+    .company-header h4{
+        margin:0;
+        font-size:22px;
+        font-weight:bold;
+    }
+
+    .company-header small{
+        color:gray;
+    }
+
+    </style>
+
 </head>
+
 
 <body class="bg-light" style="background-color: #e68663; padding: 30px;">
 
 <div class="container mt-5">
+    <div class="company-header">
+
+    <img src="/images/logo.png" alt="Company Logo">
+
+    <div>
+        <h4>C.T Housing Finance Limited</h4>
+        <small>Student Management System</small>
+    </div>
+
+</div>
 
     <div class="d-flex justify-content-between" style="background-color: #6924e8; padding: 20px; border-radius: 10px;">
 
@@ -393,7 +433,7 @@ $(document).ready(function(){
       
     setTimeout(function(){
 
-        alert("Session Expired. Please Login Again.");
+        alert("Your login time is Expired. Please Login Again.");
 
         window.location.href = "/logout";
 

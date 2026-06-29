@@ -1,50 +1,154 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
+
     <title>Register</title>
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+
+        body{
+            margin:0;
+     background:linear-gradient(135deg,#4e73df,#224abe);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:Arial, Helvetica, sans-serif;
+    padding:20px;
+}
+
+       .register-card{
+    width:400px;
+    background:#ffffff;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.2);
+}
+
+       .company-header{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    margin-bottom:20px;
+}
+
+.company-header img{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.company-header h4{
+    margin:0;
+    font-size:22px;
+    font-weight:bold;
+    color:#000;
+}
+
+.company-header small{
+    color:#666;
+}
+
+    </style>
+
 </head>
 
-<body class="bg-light">
+<body>
+    <div class="register-card">
 
-<div class="container mt-5">
+<div class="company-header">
 
-    <div class="card p-4">
+    <img src="/images/logo.png" alt="Logo">
 
-        <h2 class="text-center mb-4">
-            Register
-        </h2>
+    <div>
+        <h4>C.T Housing Finance Limited</h4>
+        <small>Student Management System</small>
+    </div>
 
-        <form id="registerForm">
+</div>
+
+    <h3 class="title">
+        Create New Account
+    </h3>
+
+    <form id="registerForm">
+
+        <div class="mb-2">
 
             <input type="text"
                    id="name"
-                   class="form-control mb-3"
-                   placeholder="Enter Name">
+                   class="form-control"
+                   placeholder="Enter Full Name">
+
+        </div>
+
+        <div class="mb-2">
 
             <input type="email"
                    id="email"
-                   class="form-control mb-3"
+                   class="form-control"
                    placeholder="Enter Email">
 
-            <input type="password"
-                   id="password"
-                   class="form-control mb-3"
-                   placeholder="Enter Password">
+        </div>
 
-            <button type="submit" class="btn btn-success w-100">
-                Register
-            </button>
+       <div class="mb-2">
+    <div class="input-group">
 
-        </form>
+        <input
+            type="password"
+            id="password"
+            class="form-control"
+            placeholder="Enter Password">
 
-        <br>
+        <span class="input-group-text" id="togglePassword" style="cursor:pointer;">
+            <i class="bi bi-eye-slash-fill"></i>
+        </span>
 
-        <a href="/login" class="btn btn-primary w-100">
-            Already have an account? Login
+    </div>
+</div>
+<div class="input-group mb-2">
+
+    <input type="password"
+           id="confirm_password"
+           class="form-control"
+           placeholder="Confirm Password">
+
+    <span class="input-group-text" id="toggleConfirmPassword" style="cursor:pointer;">
+        <i class="bi bi-eye-fill"></i>
+    </span>
+
+</div>
+
+        <button type="submit"
+                class="btn btn-success btn-register w-100">
+
+            <i class="bi bi-person-check-fill"></i>
+            Create Account
+
+        </button>
+
+    </form>
+
+    <div class="bottom-link">
+
+        Already have an account?
+
+        <br><br>
+
+        <a href="/login"
+           class="btn btn-outline-primary w-100">
+
+            <i class="bi bi-box-arrow-in-right"></i>
+            Login Here
+
         </a>
 
     </div>
@@ -54,66 +158,98 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 <script>
-$(document).ready(function () {
-      console.log("Ready");
-    $("#registerForm").submit(function (e) {
 
-        e.preventDefault();
-        console.log("Submit Clicked");
-        $.ajax({
+$(document).ready(function(){
 
-            url: "/register",
+      $("#togglePassword").click(function(){
 
-            type: "POST",
+        let password = $("#password");
 
-            data: {
+        if(password.attr("type") === "password"){
 
-                name: $("#name").val(),
+            password.attr("type","text");
 
-                email: $("#email").val(),
+            $(this).html('<i class="bi bi-eye-fill"></i>');
 
-                password: $("#password").val(),
+        }else{
 
-                _token: $("meta[name='csrf-token']").attr("content")
+            password.attr("type","password");
 
-            },
+            $(this).html('<i class="bi bi-eye-slash-fill"></i>');
 
-            success: function (response) {
+        }
 
-                alert(response.message);
+    });
+      
+     $("#toggleConfirmPassword").click(function(){
 
-                $("#registerForm")[0].reset();
+    let confirmPassword = $("#confirm_password");
 
-                window.location.href = "/login";
+    if(confirmPassword.attr("type") === "password"){
 
-            },
+        confirmPassword.attr("type","text");
 
-            error: function (xhr) {
+        $(this).html('<i class="bi bi-eye-fill"></i>');
 
-                let errors = xhr.responseJSON.errors;
+    }else{
 
-                if (errors) {
+        confirmPassword.attr("type","password");
 
-                    let message = "";
+        $(this).html('<i class="bi bi-eye-slash-fill"></i>');
 
-                    $.each(errors, function (key, value) {
+    }
 
-                        message += value[0] + "\n";
+});
 
-                    });
+    $("#registerForm").submit(function(e){
 
-                    alert(message);
+    e.preventDefault();
 
-                }
+    let password = $("#password").val();
+    let confirmPassword = $("#confirm_password").val();
 
+    // ✅ NEW CHECK
+    if(password !== confirmPassword){
+        alert("please check your password its not matching!");
+        return; // form submit stop
+    }
+
+    $.ajax({
+        url:"/register",
+        type:"POST",
+        data:{
+            name:$("#name").val(),
+            email:$("#email").val(),
+            password:password,
+            password_confirmation:$("#confirm_password").val(), 
+            _token:$("meta[name='csrf-token']").attr("content")
+        },
+
+        success:function(response){
+            alert(response.message);
+            $("#registerForm")[0].reset();
+            window.location.href="/login";
+        },
+
+        error:function(xhr){
+            if(xhr.responseJSON.errors){
+                let message="";
+                $.each(xhr.responseJSON.errors,function(key,value){
+                    message+=value[0]+"\n";
+                });
+                alert(message);
             }
-
-        });
-
+            else if(xhr.responseJSON.message){
+                alert(xhr.responseJSON.message);
+            }
+        }
     });
 
 });
-</script>
 
+});
+
+</script>
+</div>
 </body>
 </html>
